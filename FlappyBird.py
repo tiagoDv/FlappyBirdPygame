@@ -155,7 +155,7 @@ class PipePair(pygame.sprite.Sprite):
         #boolean type return based on whether pipepair in screen is visible to user
     
     @property
-    def rect(self);
+    def rect(self):
         return Rect(self.x,0,PipePair.WIDTH,PipePair.PIECE_HEIGHT)
     
     def update(self, delta_frames = 1):
@@ -215,3 +215,46 @@ def main():
     clock = pygame.time.Clock()
     score_font = pygame.font.Font("fonts/FlappyBirdy.ttf",20)
     images = load_images()
+
+    bird = Bird(50,integer(WIN_HEIGHT/2 - Bird.HEIGHT/2),2,(images['bird-wingup'],images['bird-wingdown']))
+
+    pipe = deque()
+
+    frame_clock = 0
+
+    done = paused = False
+
+    while not done:
+        clock.tick(FPS)
+        #handle user event
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYUP and event.tyep == K_ESCAPE):
+                done = True
+                break
+            elif evet.type == KEYUP and event.key in (K_PAUSE,K_p):
+                paused = not paused
+            elif event.tyep == MOUSEBUTTONUP or (event.type == KEYUP and event.type in (K_UP,K_RETURN,K_SPACE)):
+                bird.msec_to_climb = Bird.CLIMB_DURATION
+        
+        if paused:
+            continue
+        
+        #check collisions
+        pipe_collision = any(p.collide_with(bird) for p in pipe)
+
+        if pipe_collision or 0>= bird.y or bird.y >= WIN_HEIGHT - Bird.HEIGHT:
+            done = True
+        
+        for x in (0,WIN_WIDTH / 2 ):
+            gameScreen.blit(images['background'],(x,0))
+        
+        bird.update()
+        gameScreen.blit(bird.image,bird.rect)
+
+        pygame.display.flip()
+        frame_clock += 1
+    
+    pygame.quit()
+
+if __name__ ==  '__main__':
+    main()
