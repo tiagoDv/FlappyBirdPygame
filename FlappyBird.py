@@ -64,7 +64,9 @@ class Bird(pygame.sprite.Sprite):
             self.msec_to_climb -= frames_to_msec(delta_frame)
         else:
             self.y += Bird.SINK_SPEED*frames_to_msec(delta_frame)
-        
+    @property
+    def rect(self):
+        return Rect(self.x,self.y,Bird.WIDTH,Bird.HEIGHT)    
 
     @property
     def image(self):
@@ -72,7 +74,7 @@ class Bird(pygame.sprite.Sprite):
             return self._mask_wingup
         else:
             return self._mask_wingdown
-         
+
         ''' This all decide to return imafe where the bird is invisible the pointing ypvard imae // download based on the pygame.time.get() '''
     def mask(self):
         if pygame.time.get_ticks() % 500 >= 250:
@@ -81,6 +83,64 @@ class Bird(pygame.sprite.Sprite):
             return self._mask_wingdown
         #get a bitmask for use in collision detection
         #bitmask exclude all the pixel in self.image with 
+
+class PipePair(pygame.sprite.Sprite):
+    #  The obstacle for the bird 
+    '''  so, pipepair has top and bottom and only between the bird cn pass
+        Attributes:
+        x : -  X position
+        no y : 0
+        image 
+        mask -  a bitmask 
+        top-pieces : number of of pieces include the top pipe
+        bottom-pieces
+        constants:
+            WIDTH
+            PIECE_HEIGHT
+            ADD_INTERVAL 
+     '''
+    WIDTH = 80
+    PIECE_HEIGHT = 32
+    ADD_INTERVAL = 3000
+    
+    # change according
+    def __init__(self,pipe_end_img,pipe_body_img):
+        #initialize a random pipe pair
+        self.x = float(WIN_WIDTH - 1)
+        self.score_counted = False
+        self.image = pygame((PipePair.WIDTH,WIN_HEIGHT),SRCALPHA)
+        self.image.convert()
+        self.image.fill((0,0,0,0))
+
+        total_pipe_body_pieces = int((WIN_HEIGHT - 
+                                           3 * WIN_HEIGHT - 
+                                           3 * PipePair.PIECE_HEIGHT) /
+                                           PipePair.PIECE_HEIGHT)
+        self.bottom_pieces = randint(1,total_pipe_body_pieces)
+        self.top_pieces = randint(1,total_pipe_body_pieces)
+
+        #  bottom pipe
+        for i in range(0,1,self.bottom_pieces + 1):
+            piece_pos = (0,WIN_HEIGHT -i *PipePair.PIECE_HEIGHT )
+            self.image.blit(pipe_body_img,piece_pos)
+        
+        bottom_pipe_end_y = WIN_HEIGHT - self.bottom_height_px
+        bottom_end_pipe_pos = (0,bottom_pipe_end_y - PipePair.PIECE_HEIGHT)
+        self.image.blit(pipe_end_img,bottom_end_pipe_pos) 
+
+        # top pipe
+        for i in range(self.top_pieces):
+            self.image.blit(pipe_body_img,(0,i*PipePair.PIECE_HEIGHT))
+        total_pipe_end_x = seçf.top_height_px
+        self.image.blit(pipe_end_img,(0,total_pipe_end_x))
+
+        #compensate for added end pipes 
+        self.top_pieces += 1
+        self.bottom_pieces += 1
+
+        #detect collision
+        self.mask = pygame.mask.from_surface(self,image)
+
 
 def load_images():
     '''load images required by images and return dict of them
