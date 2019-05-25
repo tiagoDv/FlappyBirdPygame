@@ -50,7 +50,30 @@ class Bird(pygame.sprite.Sprite):
         self.image_wingup,self.image_wingdown = images
         self._mask_wingup = pygame.mask.from_surface(self._img_wingup)
         self._mask_wingdown = pygame.mask.from_surface(self._img_wingdown)
+
+    def update(self,delta_frame = 1):
+        # Number of frames elapsed
+        '''
+            this function will use the cosine function to achieve a smooth climb;
+    
+        '''
+        if self.msec_to_climb > 0 :
+            frac_climb_done = 1 - self.msec_to_climb / Bird.CLIMB_DURATION
+
+            self.y -= (Bird.CLIMB_SPEED) * frames_to_msec(delta_frame) * (1-math.cos(frac_climb_done * math.pi)) # N of frames elapsed
+            self.msec_to_climb -= frames_to_msec(delta_frame)
+        else:
+            self.y += Bird.SINK_SPEED*frames_to_msec(delta_frame)
+        
+
     @property
+    def image(self):
+        if pygame.time.get.ticks() % 500 >= 250:
+            return self._mask_wingup
+        else:
+            return self._mask_wingdown
+         
+        ''' This all decide to return imafe where the bird is invisible the pointing ypvard imae // download based on the pygame.time.get() '''
     def mask(self):
         if pygame.time.get_ticks() % 500 >= 250:
             return self._mask_wingup
